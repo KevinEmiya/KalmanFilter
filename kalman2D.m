@@ -8,7 +8,7 @@ duration = 10;
 sampleCnt = duration / dT;
 
 sigma_l_x_real = 0.1;
-sigma_l_y_real = 5;
+sigma_l_y_real = 10;
 eps = [sigma_l_x_real; sigma_l_y_real];
 Q_ll_real = [sigma_l_x_real^2 0;0 sigma_l_y_real^2]; %Real cofactor matrix of measurements
 
@@ -23,7 +23,7 @@ T = [1 0 dT 0; 0 1 0 dT;0 0 1 0; 0 0 0 1]; %Transition Matrix
 
 %A priori estimated erros
 sigma_l_x = 0.1;
-sigma_l_y = 5;
+sigma_l_y = 10;
 Q_ll = [sigma_l_x^2 0;0 sigma_l_y^2];
 
 sigma_w_x = 2;
@@ -43,7 +43,7 @@ pos_filter = zeros(sampleCnt , 2);
 periodCnt = 1;
 for t = 0 : dT : duration
     %Simulate real state vector
-    x_real = T * x_real  + S * w_real * randn;
+    x_real = T * x_real  + S * (w_real + randn);
     pos_real(periodCnt, :) = x_real(1:2)';
     
     %Simulate measured positions
@@ -52,7 +52,7 @@ for t = 0 : dT : duration
     pos_meas(periodCnt, :) = l_t;
      
     %Perform filter using estimated errors
-    x_dash = T * x_hat + S * w * randn;
+    x_dash = T * x_hat + S * (w + randn);
     Q_xx_dash = T * Q_xx_hat * T' + S * Q_ww * S';
     
     d = l_t - A * x_hat; %Innovation
@@ -60,7 +60,7 @@ for t = 0 : dT : duration
     
     K = Q_xx_dash * A' * Q_dd^-1;
     x_hat = x_dash + K * d;
-%     Q_xx_hat = Q_xx_dash - K * Q_dd * K';
+   % Q_xx_hat = Q_xx_dash - K * Q_dd * K';
     Q_xx_hat = (eye(4) - K * A) * Q_xx_dash;
     
     pos_filter(periodCnt, :) = x_hat(1:2)';
@@ -71,3 +71,5 @@ figure, plot(pos_real(:,1),pos_real(:,2),'-xr');
 hold on; 
 plot(pos_meas(:,1),pos_meas(:,2),'-xb');
 plot(pos_filter(:,1),pos_filter(:,2),'-xg');
+grid on;
+legend('模型值','测量值','平滑值','Location','best');
