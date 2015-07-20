@@ -28,8 +28,9 @@ Q_ll = [sigma_l_x^2 0;0 sigma_l_y^2];
 
 sigma_w_x = 2;
 sigma_w_y = -3;
-w = [sigma_w_x; sigma_w_y];
-Q_ww = [sigma_w_x^2 0;0 sigma_w_y^2];
+w_err_factor = 1;
+w = [sigma_w_x; sigma_w_y] * w_err_factor;
+Q_ww = [sigma_w_x^2 0;0 sigma_w_y^2] * w_err_factor ^ 2;
 
 %Init estimates
 S = [0.5 * dT^2 0;0 0.5 * dT^2;dT 0;0 dT];
@@ -41,9 +42,16 @@ pos_meas = zeros(sampleCnt , 2);
 pos_filter = zeros(sampleCnt , 2);
 
 periodCnt = 1;
+sharpChange = 20;
+changeFrame = 50;
+
 for t = 0 : dT : duration
+    white_noise = randn;
     %Simulate real state vector
-    x_real = T * x_real  + S * (w_real + randn);
+    x_real = T * x_real  + S * (w_real * white_noise);
+    if(periodCnt == changeFrame)
+        x_real(2) = x_real(2) + sharpChange;
+    end
     pos_real(periodCnt, :) = x_real(1:2)';
     
     %Simulate measured positions
@@ -52,7 +60,7 @@ for t = 0 : dT : duration
     pos_meas(periodCnt, :) = l_t;
      
     %Perform filter using estimated errors
-    x_dash = T * x_hat + S * (w + randn);
+    x_dash = T * x_hat + S * (w_real * white_noise);
     Q_xx_dash = T * Q_xx_hat * T' + S * Q_ww * S';
     
     d = l_t - A * x_hat; %Innovation
