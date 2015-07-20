@@ -80,4 +80,4 @@ hold on;
 plot(pos_meas(:,1),pos_meas(:,2),'-xb');
 plot(pos_filter(:,1),pos_filter(:,2),'-xg');
 grid on;
-legend('模型值','测量值','平滑值','Location','best');
+legend('Model','Measured','Filtered','Location','best');
