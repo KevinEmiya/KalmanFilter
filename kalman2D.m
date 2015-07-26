@@ -42,7 +42,7 @@ pos_meas = zeros(sampleCnt , 2);
 pos_filter = zeros(sampleCnt , 2);
 
 periodCnt = 1;
-sharpChange = 20;
+sharpChange = 0;
 changeFrame = 50;
 
 for t = 0 : dT : duration
@@ -63,7 +63,7 @@ for t = 0 : dT : duration
     x_dash = T * x_hat + S * (w_real * white_noise);
     Q_xx_dash = T * Q_xx_hat * T' + S * Q_ww * S';
     
-    d = l_t - A * x_hat; %Innovation
+    d = l_t - A * x_dash; %Innovation
     Q_dd = Q_ll + A * Q_xx_dash * A';
     
     K = Q_xx_dash * A' * Q_dd^-1;
